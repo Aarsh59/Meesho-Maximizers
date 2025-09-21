@@ -66,25 +66,25 @@ python Flask.py
 ### 1. Backend Running
 *[Screenshot of Flask server successfully starting]*
 
-![Backend Running](images/image2.png)
+![Backend Running](Images/image2.png)
 
 
 ### 2. User Input
 *[Screenshot of user entering product features]*
 
-![User Input](images/image3.png)
+![User Input](Images/image3.png)
 
 ### 3. Category Mismatch Warning
 *[Screenshot showing warning when features don't match category]*
 
-![Mismatch Warning](images/image4.png)
+![Mismatch Warning](Images/image4.png)
 
 
 
 ### 4. Successful Generation
 *[Screenshot showing successful AI generation message]*
 
-![Successful Generation](images/image5.png)
+![Successful Generation](Images/image5.png)
 
 
 ---
@@ -103,7 +103,7 @@ python Flask.py
 ├── 📄 Flask.py          # Backend server
 ├── 📄 front.html        # Frontend interface  
 ├── 📄 README.md         # This file
-└── 📁 images/           # Demo screenshots
+└── 📁 Images/           # Demo screenshots
     ├── image2.png
     ├── image3.png
     ├── image4.png
