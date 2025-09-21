@@ -38,6 +38,7 @@ git clone https://github.com/Aarsh59/Meesho-Dice-Challenge-2.0
 
 
 # Activate virtual environment
+python3 -m venv venv
 # Windows:
 venv\Scripts\activate
 # macOS/Linux:
@@ -65,26 +66,22 @@ python Flask.py
 ### 1. Backend Running
 *[Screenshot of Flask server successfully starting]*
 
-![Backend Running](images/image1.png)
+![Backend Running](images/image2.png)
 
-### 2. Frontend Interface
-*[Screenshot of the main catalog upload page with banner]*
 
-![Frontend Interface](images/image2.png)
-
-### 3. User Input
+### 2. User Input
 *[Screenshot of user entering product features]*
 
 ![User Input](images/image3.png)
 
-### 4. Category Mismatch Warning
+### 3. Category Mismatch Warning
 *[Screenshot showing warning when features don't match category]*
 
 ![Mismatch Warning](images/image4.png)
 
 
 
-### 5. Successful Generation
+### 4. Successful Generation
 *[Screenshot showing successful AI generation message]*
 
 ![Successful Generation](images/image5.png)
@@ -107,7 +104,6 @@ python Flask.py
 ├── 📄 front.html        # Frontend interface  
 ├── 📄 README.md         # This file
 └── 📁 images/           # Demo screenshots
-    ├── image1.png
     ├── image2.png
     ├── image3.png
     ├── image4.png
