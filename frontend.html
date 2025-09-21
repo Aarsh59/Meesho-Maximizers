@@ -1,0 +1,580 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Catalog Upload - Demo (with Image Editing & Chatbot)</title>
+  <style>
+    /* --- Base and Layout Styles (from File 1) --- */
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #fafafa;
+    }
+    .bar {
+      background: #fff;
+      padding: 14px 18px;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      max-width: 720px;
+      margin: 0 auto 18px;
+    }
+    label {
+      display: block;
+      margin: 10px 0 6px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #e6e6e6;
+    }
+    .note {
+      color: #888;
+      font-size: 12px;
+      margin: 6px 0;
+    }
+    .btn {
+      background: #d035b9;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-warning {
+      background: #f59e0b;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .btn-secondary, .btn.secondary {
+      background: #6b7280;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+    /* --- Banner Carousel Styles (from File 1) --- */
+    .banner-container{
+      position:relative;
+      width:100%;
+      max-width:100%;
+      overflow:visible;
+      height:420px;
+      background:#fff;
+    }
+    .banner-slide{
+      display:flex;
+      transition:transform 0.5s ease-in-out;
+      height:100%;
+    }
+    .banner-slide img{
+      width:100%;
+      height:100%;
+      object-fit:cover;         /* fill like Meesho app */
+      object-position:center;   /* center focus */
+    }
+    .banner-dots{
+      position:absolute;
+      bottom:10px;
+      left:50%;
+      transform:translateX(-50%);
+      display:flex;
+      gap:6px;
+    }
+    .banner-dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:#ddd;
+      cursor:pointer;
+    }
+    .banner-dot.active{background:#d035b9}
+
+    /* --- Steps and Chatbot Styles (from File 1) --- */
+    .steps { display: flex; gap: 12px; margin: 12px 0; }
+    .step { flex: 1; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #eee; background: #fff; }
+    .chatbox { border: 1px solid #eee; background: #fff; padding: 10px; border-radius: 8px; max-height: 220px; overflow: auto; }
+    .chat-row { margin-bottom: 8px; }
+    .seller { background: #eef2ff; padding: 8px; border-radius: 8px; display: inline-block; }
+    .bot { background: #f1f1f1; padding: 8px; border-radius: 8px; display: inline-block; }
+    .bot-warning { background: #fef3c7; padding: 8px; border-radius: 8px; display: inline-block; border-left: 4px solid #f59e0b; }
+    .warning-buttons { margin-top: 8px; }
+
+    /* --- Image Upload & Editing Styles (from File 2) --- */
+    .upload-section { border: 1px solid #ddd; border-radius: 8px; padding: 16px; background: #fff; text-align: center; }
+    .upload-btn { border: 2px dashed #d035b9; color: #d035b9; padding: 20px; border-radius: 8px; cursor: pointer; display: inline-block; width: 120px; }
+    input[type="file"] { display: none; }
+    #imagePreview { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+    .thumb { position: relative; width: 150px; height: 150px; border-radius: 10px; overflow: hidden; border: 1px solid #eee; background: #fff; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .del { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 50%; border: none; background: rgba(0,0,0,0.6); color: #fff; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .del:hover { background: rgba(0,0,0,0.8); }
+    .editBtn { position: absolute; bottom: 8px; right: 8px; width: 34px; height: 34px; border-radius: 8px; border: none; background: rgba(255,255,255,0.95); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+    .editBtn img { width: 18px; height: 18px; opacity: 0.95; }
+    .selBadge { position: absolute; top: 8px; left: 8px; background: rgba(208,53,185,0.95); color: #fff; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; }
+
+    /* --- Modal Styles (from File 2) --- */
+    .modalBack { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 50; }
+    .modal { background: #fff; border-radius: 10px; padding: 16px; max-width: 900px; width: 94%; max-height: 90vh; overflow: auto; box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+    .modal h3 { margin: 0 0 8px; }
+    .modal .row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .panel { flex: 1; min-width: 260px; border: 1px solid #eee; border-radius: 8px; padding: 10px; text-align: center; background: #fbfbfd; }
+    .panel img { max-width: 100%; max-height: 420px; border-radius: 6px; }
+    .chooseRow { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+    .loader { display: inline-block; border: 4px solid #f3f3f3; border-top: 4px solid #d035b9; border-radius: 50%; width: 28px; height: 28px; animation: spin .9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .small { font-size: 13px; color: #444; }
+    .hint { font-size: 13px; color: #777; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <div class="banner-container">
+    <div id="bannerSlides" class="banner-slide">
+      <img src="banner3.png" alt="Banner 1">
+    </div>
+    <div id="bannerDots" class="banner-dots"></div>
+  </div>
+
+  <div class="bar">
+    <h2>Catalog Upload</h2>
+    <div class="steps">
+      <div class="step" style="border-color:#d035b9;color:#d035b9">Add Product</div>
+      <div class="step">Basic Details</div>
+      <div class="step">Additional Details</div>
+      <div class="step">Add Variant(s)</div>
+    </div>
+  </div>
+
+  <div class="bar">
+    <label>Select Category*</label>
+    <select id="categoryInput">
+      <option value="">Click here to select category</option>
+      <option value="Clothing">Clothing</option>
+      <option value="Footwear">Footwear</option>
+      <option value="Bags & Accessories">Bags & Accessories</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Home & Kitchen">Home & Kitchen</option>
+      <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+    </select>
+
+    <label style="margin-top:16px">Product Image*</label>
+    <div class="note">Upload up to 4 images. Click the edit icon (✎) on a thumbnail to enhance it.</div>
+    <div class="upload-section">
+      <label for="finput" class="upload-btn">↑ Upload</label>
+      <input id="finput" type="file" accept="image/*" multiple>
+    </div>
+    <div id="imagePreview"></div>
+
+    <label style="margin-top:16px">Try our Auto Generated Description</label>
+    <div style="background:#fff;padding:12px;border-radius:8px;border:1px solid #eee">
+      <div id="chatArea" class="chatbox"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input id="chatInput" type="text" placeholder="Enter product keywords/features (e.g., Brown wallet leather stylish shiny)" />
+        <button id="chatBtn" class="btn">🪄</button>
+      </div>
+    </div>
+
+    <label style="margin-top:16px">Product Name*</label>
+    <input id="titleInput" type="text" placeholder="e.g., Brown leather wallet" />
+
+    <label>Product Description</label>
+    <textarea id="descInput" rows="4" placeholder="e.g., Solid two-fold wallet with clean details..."></textarea>
+
+    <div style="margin-top:12px;text-align:right">
+      <button id="nextBtn" class="btn">Next</button>
+    </div>
+  </div>
+
+  <div id="modalBack" class="modalBack">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3>Edit Image</h3>
+        <div>
+          <button id="closeModal" class="btn secondary" style="margin-left:0;">Close</button>
+        </div>
+      </div>
+      <div class="hint">Our model improves clarity, brightness, and removes the background. You can choose which version to keep.</div>
+      <div style="margin-top:12px" class="row">
+        <div class="panel" id="beforePanel">
+          <div class="small">Before</div>
+          <img id="beforeImg" src="" alt="before">
+          <div class="chooseRow"><label><input type="radio" name="pick" value="before" checked> Keep Before</label></div>
+        </div>
+        <div class="panel" id="afterPanel">
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px">
+            <div class="small">After</div>
+            <div id="editStatus"></div>
+          </div>
+          <img id="afterImg" src="" alt="after">
+          <div class="chooseRow"><label><input type="radio" name="pick" value="after"> Keep After</label></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+        <button id="applyBtn" class="btn">Apply Selected</button>
+        <button id="reeditBtn" class="btn secondary" style="margin-left:0;">Re-run Edit</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// --- SCRIPT FOR IMAGE UPLOAD & EDITING ---
+const MAX_F = 4;
+let sF = []; // file objects array (keeps current images)
+let activeEditIdx = -1; // index of thumb we are editing
+const previewEl = document.getElementById('imagePreview');
+
+const el = (k, attr = {}, txt = '') => { const n = document.createElement(k); for (let a in attr) n.setAttribute(a, attr[a]); if (txt) n.innerHTML = txt; return n; };
+
+function renderPreviews() {
+  previewEl.innerHTML = '';
+  sF.forEach((f, i) => {
+    const wrap = el('div', { 'class': 'thumb', 'data-idx': i });
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(f);
+    img.onload = () => { try { URL.revokeObjectURL(img.src); } catch (e) {} };
+    wrap.appendChild(img);
+
+    const idxBadge = el('div', {}, `<div class="selBadge">${i + 1}</div>`);
+    wrap.appendChild(idxBadge.firstChild);
+
+    const d = el('button', { 'class': 'del', 'title': 'Remove' }, '×');
+    d.onclick = () => { removeAt(i); };
+    wrap.appendChild(d);
+
+    const eb = el('button', { 'class': 'editBtn', 'title': 'Edit image' });
+    const icon = el('img', { src: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#222"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg>`) });
+    eb.appendChild(icon);
+    eb.onclick = () => { openEditor(i); };
+    wrap.appendChild(eb);
+
+    previewEl.appendChild(wrap);
+  });
+}
+
+function isDup(file) { return sF.some(x => x.name === file.name && x.size === file.size && x.lastModified === file.lastModified); }
+function removeAt(i) { if (i < 0 || i >= sF.length) return; sF.splice(i, 1); renderPreviews(); }
+function replaceAt(i, blob, nameFallback) {
+  if (!blob) return;
+  const n = nameFallback || (sF[i] && sF[i].name) || `img${Date.now()}.png`;
+  const toFile = blob instanceof File ? blob : (blob instanceof Blob ? new File([blob], n, { type: blob.type || 'image/png' }) : null);
+  if (!toFile && typeof blob === 'string' && blob.startsWith('data:')) {
+    const f = dataURLtoFile(blob, n);
+    sF[i] = f;
+  } else if (toFile) {
+    sF[i] = toFile;
+  }
+  renderPreviews();
+}
+
+function dataURLtoFile(dataurl, filename) {
+  const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]), n = bstr.length, u8 = new Uint8Array(n);
+  for (let i = 0; i < n; i++) u8[i] = bstr.charCodeAt(i);
+  return new File([u8], filename, { type: mime });
+}
+
+document.getElementById('finput').addEventListener('change', (ev) => {
+  const files = Array.from(ev.target.files || []);
+  if (!files.length) return;
+  if (sF.length >= MAX_F) { alert(`You already have ${MAX_F} images. Remove one to add more.`); ev.target.value = ''; return; }
+  const slots = Math.min(MAX_F - sF.length, files.length);
+  if (files.length > slots) alert(`Taking first ${slots} files. Max is ${MAX_F}.`);
+  for (let f of files.slice(0, slots)) {
+    if (!isDup(f)) { sF.push(f); }
+  }
+  renderPreviews();
+  ev.target.value = '';
+});
+
+const modalBack = document.getElementById('modalBack');
+const beforeImg = document.getElementById('beforeImg');
+const afterImg = document.getElementById('afterImg');
+const editStatus = document.getElementById('editStatus');
+const applyBtn = document.getElementById('applyBtn');
+const reeditBtn = document.getElementById('reeditBtn');
+const closeModal = document.getElementById('closeModal');
+
+closeModal.onclick = () => { hideModal(); };
+modalBack.onclick = (e) => { if (e.target === modalBack) hideModal(); };
+
+function showModal() { modalBack.style.display = 'flex'; }
+function hideModal() { modalBack.style.display = 'none'; activeEditIdx = -1; editStatus.innerHTML = ''; beforeImg.src = ''; afterImg.src = ''; }
+
+async function openEditor(idx) {
+  activeEditIdx = idx;
+  const f = sF[idx];
+  if (!f) return alert('File not found');
+  beforeImg.src = URL.createObjectURL(f);
+  beforeImg.onload = () => { try { URL.revokeObjectURL(beforeImg.src); } catch (e) {} };
+  afterImg.src = ''; editStatus.innerHTML = `<span class="loader"></span> Editing...`;
+  showModal();
+
+  try {
+    const resp = await tryRemoteEdit(f);
+    if (resp && resp.dataURL) {
+      afterImg.src = resp.dataURL;
+      editStatus.innerHTML = `<span class="small">Ready (remote)</span>`;
+    } else {
+      throw new Error('remote no data');
+    }
+  } catch (e) {
+    console.warn('Remote edit failed, using local fallback:', e);
+    const dataURL = await localEditImage(f);
+    afterImg.src = dataURL;
+    editStatus.innerHTML = `<span class="small">Ready (local)</span>`;
+  }
+}
+
+applyBtn.onclick = () => {
+  if (activeEditIdx < 0 || activeEditIdx >= sF.length) return;
+  const picked = document.querySelector('input[name="pick"]:checked').value;
+  if (picked === 'before') { hideModal(); return; }
+  const data = afterImg.src;
+  if (!data || !data.startsWith('data:')) { alert('No edited image available'); return; }
+  replaceAt(activeEditIdx, data, `edited_${sF[activeEditIdx].name || 'img.png'}`);
+  hideModal();
+};
+
+reeditBtn.onclick = async () => {
+  if (activeEditIdx < 0) return;
+  editStatus.innerHTML = `<span class="loader"></span> Re-editing...`;
+  const f = sF[activeEditIdx];
+  try {
+    const resp = await tryRemoteEdit(f);
+    if (resp && resp.dataURL) {
+      afterImg.src = resp.dataURL; editStatus.innerHTML = `<span class="small">Ready (remote)</span>`;
+    } else throw new Error('remote empty');
+  } catch (e) {
+    const dataURL = await localEditImage(f);
+    afterImg.src = dataURL; editStatus.innerHTML = `<span class="small">Ready (local)</span>`;
+  }
+};
+
+async function tryRemoteEdit(file) {
+  try {
+    const fd = new FormData();
+    fd.append('image', file, file.name);
+    fd.append('scale', '4');     // Default enhancement scale (1–4)
+    fd.append('quality', 'high'); // low, medium, high
+
+    // Call Flask backend on port 9000
+    const r = await fetch('http://127.0.0.1:9000/enhance-image', {
+      method: 'POST',
+      body: fd
+    });
+
+    if (!r.ok) throw new Error('status ' + r.status);
+
+    // Flask returns binary image, so we convert it to base64 DataURL
+    const blob = await r.blob();
+    const dataURL = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    });
+
+    return { dataURL };
+  } catch (e) {
+    throw e;
+  }
+}
+
+
+function localEditImage(file) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX_DIM = 1600;
+      let w = img.width, h = img.height;
+      if (w > MAX_DIM || h > MAX_DIM) {
+        const ratio = Math.min(MAX_DIM / w, MAX_DIM / h);
+        w = Math.round(w * ratio); h = Math.round(h * ratio);
+      }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      let id = ctx.getImageData(0, 0, w, h);
+      let d = id.data;
+      const thr = 240;
+      for (let p = 0; p < d.length; p += 4) {
+        if (d[p] > thr && d[p + 1] > thr && d[p + 2] > thr) {
+          d[p + 3] = 0;
+        }
+      }
+      for (let p = 0; p < d.length; p += 4) {
+        if (d[p + 3] === 0) continue;
+        let rr = d[p], gg = d[p + 1], bb = d[p + 2];
+        const factor = 1.08;
+        rr = ((rr - 128) * factor) + 128; gg = ((gg - 128) * factor) + 128; bb = ((bb - 128) * factor) + 128;
+        rr *= 1.06; gg *= 1.06; bb *= 1.06;
+        rr = 255 * Math.pow(rr / 255, 0.97); gg = 255 * Math.pow(gg / 255, 0.97); bb = 255 * Math.pow(bb / 255, 0.97);
+        d[p] = clamp(rr, 0, 255); d[p + 1] = clamp(gg, 0, 255); d[p + 2] = clamp(bb, 0, 255);
+      }
+      ctx.putImageData(id, 0, 0);
+      res(c.toDataURL('image/png', 0.9));
+    };
+    img.onerror = (e) => rej(e);
+    const reader = new FileReader();
+    reader.onload = () => { img.src = reader.result; };
+    reader.onerror = (e) => rej(e);
+    reader.readAsDataURL(file);
+  });
+}
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+renderPreviews();
+
+
+// --- SCRIPT FOR CHATBOT ---
+function extractYesNo(response) {
+  console.log("Raw response to parse:", response);
+  try {
+    const jsonResponse = JSON.parse(response);
+    if (jsonResponse.answer) { response = jsonResponse.answer; }
+    else if (jsonResponse.response) { response = jsonResponse.response; }
+  } catch (e) { /* Not JSON */ }
+  const cleaned = response.toString().trim().toUpperCase();
+  console.log("Cleaned response:", cleaned);
+  if (cleaned.includes('YES') || cleaned === 'Y') { return "YES"; }
+  if (cleaned.includes('NO') || cleaned === 'N') { return "NO"; }
+  const positiveWords = ['TRUE', 'CORRECT', 'MATCH', 'BELONGS', 'FITS'];
+  for (let word of positiveWords) { if (cleaned.includes(word)) { return "YES"; } }
+  console.warn("Could not parse LLM response, defaulting to NO:", response);
+  return "NO";
+}
+
+let currentCategory = '';
+let currentFeatures = '';
+let pendingGeneration = false;
+
+document.getElementById('chatBtn').onclick = async () => {
+  const q = document.getElementById('chatInput').value.trim();
+  const category = document.getElementById('categoryInput').value.trim();
+  if (!category) { alert("⚠ Please select a category before using the chatbot!"); return; }
+
+  const chatArea = document.getElementById('chatArea');
+  chatArea.innerHTML += `<div class="chat-row seller">${q || "[No keywords entered]"}</div>`;
+  chatArea.scrollTop = chatArea.scrollHeight;
+
+  currentCategory = category;
+  currentFeatures = q;
+  pendingGeneration = false;
+
+  const sanityCheckPrompt = `Task: Category validation\nCategory: ${category}\nProduct: ${q || "none"}\n\nDoes the product match the category?\nRespond with only: YES or NO\n\nResponse:`;
+
+  try {
+    const r = await fetch("http://127.0.0.1:8000/api/chatbot", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: sanityCheckPrompt, use_json: false })
+    });
+    const j = await r.json();
+    console.log("Sanity check response:", j);
+    const llmResponse = (j.reply || "").trim();
+    const decision = extractYesNo(llmResponse);
+    console.log("FINAL decision:", decision);
+
+    if (decision === "YES") {
+      chatArea.innerHTML += `<div class="chat-row bot">🔄 Features match category. Generating product details...</div>`;
+      chatArea.scrollTop = chatArea.scrollHeight;
+      await generateProductDetails();
+    } else {
+      showMismatchWarning();
+    }
+  } catch (err) {
+    console.error("Sanity check network error:", err);
+    chatArea.innerHTML += `<div class="chat-row bot">❌ Error: Could not connect to server</div>`;
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+  document.getElementById('chatInput').value = '';
+};
+
+function showMismatchWarning() {
+  const chatArea = document.getElementById('chatArea');
+  const warningDiv = document.createElement('div');
+  warningDiv.className = 'chat-row bot-warning';
+  warningDiv.innerHTML = `
+    ⚠ The features don't seem to match the selected category. Are you sure you want to continue?
+    <div class="warning-buttons">
+      <button class="btn-warning" onclick="proceedAnyway()">Yes, Continue</button>
+      <button class="btn-secondary" onclick="cancelGeneration()">No, Cancel</button>
+    </div>`;
+  chatArea.appendChild(warningDiv);
+  chatArea.scrollTop = chatArea.scrollHeight;
+  pendingGeneration = true;
+}
+
+async function proceedAnyway() {
+  if (!pendingGeneration) return;
+  const chatArea = document.getElementById('chatArea');
+  const warningMsg = chatArea.querySelector('.bot-warning');
+  if (warningMsg) { warningMsg.remove(); }
+  chatArea.innerHTML += `<div class="chat-row bot">🔄 Proceeding anyway...</div>`;
+  chatArea.scrollTop = chatArea.scrollHeight;
+  await generateProductDetails();
+  pendingGeneration = false;
+}
+
+function cancelGeneration() {
+  if (!pendingGeneration) return;
+  const chatArea = document.getElementById('chatArea');
+  const warningMsg = chatArea.querySelector('.bot-warning');
+  if (warningMsg) { warningMsg.remove(); }
+  chatArea.innerHTML += `<div class="chat-row bot">❌ Generation cancelled</div>`;
+  chatArea.scrollTop = chatArea.scrollHeight;
+  pendingGeneration = false;
+}
+
+async function generateProductDetails() {
+  const chatArea = document.getElementById('chatArea');
+  const proceedingMsg = Array.from(chatArea.querySelectorAll('.chat-row.bot')).find(el => el.textContent.includes('Proceeding anyway'));
+  if (proceedingMsg) { proceedingMsg.remove(); }
+
+  const productPrompt = `Given below is an e-commerce product with category: "${currentCategory}".\nHere are some keywords and features: ${currentFeatures || "(none)"}.\nI want you to come up with a suitable product title and product description for the product listing.\nMake sure it is detailed, accurate, and not exaggerated. \nReturn your response strictly in JSON format like this:\n{\n  "title": "...",\n  "description": "..."\n}`;
+
+  try {
+    const r = await fetch("http://127.0.0.1:8000/api/chatbot", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: productPrompt, use_json: true })
+    });
+    const j = await r.json();
+    console.log("Product generation response:", j);
+    try {
+      const parsed = JSON.parse(j.reply);
+      if (parsed.title && parsed.description) {
+        document.getElementById('titleInput').value = parsed.title;
+        document.getElementById('descInput').value = parsed.description;
+        chatArea.innerHTML += `<div class="chat-row bot">✅ Product details generated successfully!</div>`;
+        console.log("Auto-filled successfully:", parsed);
+      } else {
+        throw new Error("Missing title or description in response");
+      }
+    } catch (e) {
+      console.warn("Product generation parse error:", e, "Raw response:", j.reply);
+      chatArea.innerHTML += `<div class="chat-row bot">❌ Error: Could not generate product details</div>`;
+    }
+  } catch (err) {
+    console.error("Product generation network error:", err);
+    chatArea.innerHTML += `<div class="chat-row bot">❌ Error: Could not connect to server</div>`;
+  }
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+document.getElementById('chatInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') { document.getElementById('chatBtn').click(); }
+});
+</script>
+
+</body>
+</html>
